@@ -6,7 +6,7 @@ Hook methods on specific object instances in Objective-C.
 Basic Usage:
 
     NSObject *obj = [[NSObject new] autorelease];
-    instance_hook_t_block hook = instance_hook_create(t, @selector(description), ^NSString *(id self) {
+    instance_hook_t_block hook = instance_hook_create(obj, @selector(description), ^NSString *(id self) {
 		NSString *orig = instance_hook_get_orig(hook)(self, @selector(description));
 		return [orig stringByAppendingString:@" Hello world!"];
 	});
