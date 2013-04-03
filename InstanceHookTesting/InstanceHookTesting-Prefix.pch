@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'InstanceHookTesting' target in the 'InstanceHookTesting' project
+//
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+#endif

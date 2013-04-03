@@ -7,8 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0D88FD51170BF460005D3291 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 0D88FD50170BF460005D3291 /* main.c */; };
-		0D88FD53170BF460005D3291 /* InstanceHook.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0D88FD52170BF460005D3291 /* InstanceHook.1 */; };
+		0D88FD63170BF528005D3291 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D88FD62170BF527005D3291 /* SenTestingKit.framework */; };
+		0D88FD65170BF528005D3291 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D88FD64170BF528005D3291 /* Cocoa.framework */; };
+		0D88FD6F170BF528005D3291 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0D88FD6D170BF528005D3291 /* InfoPlist.strings */; };
+		0D88FD72170BF528005D3291 /* InstanceHookTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D88FD71170BF528005D3291 /* InstanceHookTesting.m */; };
+		0D88FD77170BF579005D3291 /* InstanceHook.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D88FD5A170BF488005D3291 /* InstanceHook.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -18,7 +21,6 @@
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
-				0D88FD53170BF460005D3291 /* InstanceHook.1 in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
@@ -26,8 +28,19 @@
 
 /* Begin PBXFileReference section */
 		0D88FD4D170BF460005D3291 /* InstanceHook */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = InstanceHook; sourceTree = BUILT_PRODUCTS_DIR; };
-		0D88FD50170BF460005D3291 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		0D88FD52170BF460005D3291 /* InstanceHook.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = InstanceHook.1; sourceTree = "<group>"; };
+		0D88FD59170BF488005D3291 /* InstanceHook.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InstanceHook.h; sourceTree = "<group>"; };
+		0D88FD5A170BF488005D3291 /* InstanceHook.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InstanceHook.m; sourceTree = "<group>"; };
+		0D88FD60170BF527005D3291 /* InstanceHookTesting.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InstanceHookTesting.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0D88FD62170BF527005D3291 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		0D88FD64170BF528005D3291 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		0D88FD67170BF528005D3291 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		0D88FD68170BF528005D3291 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		0D88FD69170BF528005D3291 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		0D88FD6C170BF528005D3291 /* InstanceHookTesting-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "InstanceHookTesting-Info.plist"; sourceTree = "<group>"; };
+		0D88FD6E170BF528005D3291 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		0D88FD70170BF528005D3291 /* InstanceHookTesting.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InstanceHookTesting.h; sourceTree = "<group>"; };
+		0D88FD71170BF528005D3291 /* InstanceHookTesting.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InstanceHookTesting.m; sourceTree = "<group>"; };
+		0D88FD73170BF528005D3291 /* InstanceHookTesting-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "InstanceHookTesting-Prefix.pch"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,13 +51,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0D88FD5C170BF527005D3291 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0D88FD63170BF528005D3291 /* SenTestingKit.framework in Frameworks */,
+				0D88FD65170BF528005D3291 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		0D88FD44170BF460005D3291 = {
 			isa = PBXGroup;
 			children = (
-				0D88FD4F170BF460005D3291 /* InstanceHook */,
+				0D88FD59170BF488005D3291 /* InstanceHook.h */,
+				0D88FD5A170BF488005D3291 /* InstanceHook.m */,
+				0D88FD6A170BF528005D3291 /* InstanceHookTesting */,
+				0D88FD61170BF527005D3291 /* Frameworks */,
 				0D88FD4E170BF460005D3291 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -53,17 +78,49 @@
 			isa = PBXGroup;
 			children = (
 				0D88FD4D170BF460005D3291 /* InstanceHook */,
+				0D88FD60170BF527005D3291 /* InstanceHookTesting.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		0D88FD4F170BF460005D3291 /* InstanceHook */ = {
+		0D88FD61170BF527005D3291 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				0D88FD50170BF460005D3291 /* main.c */,
-				0D88FD52170BF460005D3291 /* InstanceHook.1 */,
+				0D88FD62170BF527005D3291 /* SenTestingKit.framework */,
+				0D88FD64170BF528005D3291 /* Cocoa.framework */,
+				0D88FD66170BF528005D3291 /* Other Frameworks */,
 			);
-			path = InstanceHook;
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		0D88FD66170BF528005D3291 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0D88FD67170BF528005D3291 /* AppKit.framework */,
+				0D88FD68170BF528005D3291 /* CoreData.framework */,
+				0D88FD69170BF528005D3291 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		0D88FD6A170BF528005D3291 /* InstanceHookTesting */ = {
+			isa = PBXGroup;
+			children = (
+				0D88FD70170BF528005D3291 /* InstanceHookTesting.h */,
+				0D88FD71170BF528005D3291 /* InstanceHookTesting.m */,
+				0D88FD6B170BF528005D3291 /* Supporting Files */,
+			);
+			path = InstanceHookTesting;
+			sourceTree = "<group>";
+		};
+		0D88FD6B170BF528005D3291 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				0D88FD6C170BF528005D3291 /* InstanceHookTesting-Info.plist */,
+				0D88FD6D170BF528005D3291 /* InfoPlist.strings */,
+				0D88FD73170BF528005D3291 /* InstanceHookTesting-Prefix.pch */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -85,6 +142,24 @@
 			productName = InstanceHook;
 			productReference = 0D88FD4D170BF460005D3291 /* InstanceHook */;
 			productType = "com.apple.product-type.tool";
+		};
+		0D88FD5F170BF527005D3291 /* InstanceHookTesting */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0D88FD74170BF528005D3291 /* Build configuration list for PBXNativeTarget "InstanceHookTesting" */;
+			buildPhases = (
+				0D88FD5B170BF527005D3291 /* Sources */,
+				0D88FD5C170BF527005D3291 /* Frameworks */,
+				0D88FD5D170BF527005D3291 /* Resources */,
+				0D88FD5E170BF527005D3291 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InstanceHookTesting;
+			productName = InstanceHookTesting;
+			productReference = 0D88FD60170BF527005D3291 /* InstanceHookTesting.octest */;
+			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -108,20 +183,67 @@
 			projectRoot = "";
 			targets = (
 				0D88FD4C170BF460005D3291 /* InstanceHook */,
+				0D88FD5F170BF527005D3291 /* InstanceHookTesting */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0D88FD5D170BF527005D3291 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0D88FD6F170BF528005D3291 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0D88FD5E170BF527005D3291 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0D88FD49170BF460005D3291 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0D88FD51170BF460005D3291 /* main.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0D88FD5B170BF527005D3291 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0D88FD77170BF579005D3291 /* InstanceHook.m in Sources */,
+				0D88FD72170BF528005D3291 /* InstanceHookTesting.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		0D88FD6D170BF528005D3291 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0D88FD6E170BF528005D3291 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0D88FD54170BF460005D3291 /* Debug */ = {
@@ -195,6 +317,32 @@
 			};
 			name = Release;
 		};
+		0D88FD75170BF528005D3291 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "InstanceHookTesting/InstanceHookTesting-Prefix.pch";
+				INFOPLIST_FILE = "InstanceHookTesting/InstanceHookTesting-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		0D88FD76170BF528005D3291 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = "\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "InstanceHookTesting/InstanceHookTesting-Prefix.pch";
+				INFOPLIST_FILE = "InstanceHookTesting/InstanceHookTesting-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -212,6 +360,14 @@
 			buildConfigurations = (
 				0D88FD57170BF460005D3291 /* Debug */,
 				0D88FD58170BF460005D3291 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		0D88FD74170BF528005D3291 /* Build configuration list for PBXNativeTarget "InstanceHookTesting" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D88FD75170BF528005D3291 /* Debug */,
+				0D88FD76170BF528005D3291 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};
