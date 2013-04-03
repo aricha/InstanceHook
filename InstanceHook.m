@@ -53,12 +53,6 @@ static void _instance_hook_destroy(instance_hook_t hook)
 {
 	if (!InstanceHooksByObject || !hook || !hook->validHook) return;
 	
-#ifdef DEBUG
-	char *desc = _instance_hook_copy_description(hook);
-	printf("Destroying hook %s\n", desc);
-	free(desc);
-#endif
-	
 	OSSpinLockLock(&lock);
 	
 	hook->validHook = 0;
