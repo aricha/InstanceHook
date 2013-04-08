@@ -44,7 +44,7 @@
 
 - (void)testBasicFunctionality
 {
-    TestClass *t = [[TestClass new] autorelease];
+	TestClass *t = [TestClass new];
 	instance_hook_t_block hook = instance_hook_create(t, @selector(testMethod), ^NSUInteger(id self) {
 		NSUInteger orig = (NSUInteger)instance_hook_get_orig(hook)(self, @selector(testMethod));
 		return 100 + orig;
@@ -70,6 +70,10 @@
 	STAssertFalse(instance_hook_is_valid(otherHook), @"");
 	STAssertEqualObjects([t testMethod2], @"Hello", @"");
 	instance_hook_release(otherHook);
+	
+#ifndef IHUseARC
+	[t release];
+#endif
 }
 
 @end

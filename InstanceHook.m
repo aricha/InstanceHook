@@ -12,12 +12,18 @@
 
 #define log_err(fmt...) printf("instance_hook error: " fmt)
 
+#ifdef IHUseARC
+	#define IHBridgeCast(obj) ((__bridge const void *)obj)
+#else
+	#define IHBridgeCast(obj) ((const void *)obj)
+#endif
+
 static OSSpinLock lock;
 static CFMutableDictionaryRef DynamicSubclassesByObject;
 static CFMutableDictionaryRef InstanceHooksByObject;
 
 struct _instance_hook_s {
-	id obj;
+	__unsafe_unretained id obj;
 	SEL cmd;
 	IMP method;
 	IMP origMethod;
@@ -39,10 +45,10 @@ static inline char *_instance_hook_copy_description(instance_hook_t hook)
 // caller should have acquired lock before calling
 static inline void _push_hook(instance_hook_t hook)
 {
-	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, hook->obj);
+	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, IHBridgeCast(hook->obj));
 	if (!hooksByMethod) {
 		hooksByMethod = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, NULL);
-		CFDictionarySetValue(InstanceHooksByObject, hook->obj, hooksByMethod);
+		CFDictionarySetValue(InstanceHooksByObject, IHBridgeCast(hook->obj), hooksByMethod);
 	}
 	instance_hook_t nextHook = (instance_hook_t)CFDictionaryGetValue(hooksByMethod, hook->cmd);
 	if (nextHook) hook->nextHook = nextHook;
@@ -56,8 +62,8 @@ static void _instance_hook_destroy(instance_hook_t hook)
 	OSSpinLockLock(&lock);
 	
 	hook->validHook = 0;
-	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, hook->obj);
-	Class cls = CFDictionaryGetValue(DynamicSubclassesByObject, hook->obj);
+	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, IHBridgeCast(hook->obj));
+	Class cls = CFDictionaryGetValue(DynamicSubclassesByObject, IHBridgeCast(hook->obj));
 	instance_hook_t topHook = NULL;
 	if ((topHook = (instance_hook_t)CFDictionaryGetValue(hooksByMethod, hook->cmd))) {
 		if (topHook != hook) {
@@ -86,7 +92,7 @@ static void _instance_hook_destroy(instance_hook_t hook)
 	}
 	
 	if (hooksByMethod && !CFDictionaryGetCount(hooksByMethod)) {
-		CFDictionaryRemoveValue(DynamicSubclassesByObject, hook->obj);
+		CFDictionaryRemoveValue(DynamicSubclassesByObject, IHBridgeCast(hook->obj));
 		object_setClass(hook->obj, class_getSuperclass(cls));
 		objc_disposeClassPair(cls);
 	}
@@ -120,9 +126,9 @@ void instance_hook_remove(instance_hook_t hook)
 	instance_hook_release(hook);
 }
 
-IMP instance_hook_get_orig(instance_hook_t hook)
+IHIMP instance_hook_get_orig(instance_hook_t hook)
 {
-	return hook ? hook->origMethod : NULL;
+	return hook ? (IHIMP)hook->origMethod : NULL;
 }
 
 static inline void _class_hookMethod(Class cls, Method method, IMP newImp)
@@ -153,11 +159,12 @@ static BOOL _hook_instance(instance_hook_t hook) // where the magic happens
 	OSSpinLockLock(&lock);
 	
 	Class newCls = Nil;
-	if (!(newCls = CFDictionaryGetValue(DynamicSubclassesByObject, obj))) {
+	BOOL success = YES;
+	if (!(newCls = CFDictionaryGetValue(DynamicSubclassesByObject, IHBridgeCast(obj)))) {
 		const char *clsName = class_getName(cls);
 		
 		// convert address into string
-		char address[sizeof(uintptr_t) * 2];
+		char address[sizeof(uintptr_t) * 2 + 1]; // add 1 for null terminator
 		sprintf(address, "%lx", (uintptr_t)obj);
 		
 		static const char *suffix = "_DynamicHook";
@@ -168,44 +175,55 @@ static BOOL _hook_instance(instance_hook_t hook) // where the magic happens
 		
 		if (objc_lookUpClass(newClsName)) {
 			log_err("Class %s already exists!\n", newClsName);
-			goto failure;
+			success = NO;
 		}
 		
-		newCls = objc_allocateClassPair(cls, newClsName, 0);
-		if (!newCls) {
-			log_err("Could not create class %s\n", newClsName);
-			goto failure;
+		if (success) {
+			newCls = objc_allocateClassPair(cls, newClsName, 0);
+			if (!newCls) {
+				log_err("Could not create class %s\n", newClsName);
+				success = NO;
+			}
+			
+			if (success) {
+				objc_registerClassPair(newCls);
+				CFDictionarySetValue(DynamicSubclassesByObject, IHBridgeCast(obj), IHBridgeCast(newCls));
+				
+				Method classMethod = class_getInstanceMethod(newCls, @selector(class));
+				id hookedClass = ^Class(__unsafe_unretained id self){
+					return cls;
+				};
+				_class_hookMethod(newCls, classMethod, imp_implementationWithBlock(hookedClass));
+			}
 		}
-		objc_registerClassPair(newCls);
-		CFDictionarySetValue(DynamicSubclassesByObject, obj, newCls);
-		
-		Method classMethod = class_getInstanceMethod(newCls, @selector(class));
-		id hookedClass = ^Class(id self){
-			return cls;
-		};
-		_class_hookMethod(newCls, classMethod, imp_implementationWithBlock(hookedClass));
 	}
 	
-	hook->origMethod = method_getImplementation(oldMethod);
-	_class_hookMethod(newCls, oldMethod, newImp);
+	if (success) {
+		hook->origMethod = method_getImplementation(oldMethod);
+		_class_hookMethod(newCls, oldMethod, newImp);
+		
+#ifdef IHUseARC
+		// ARC forbids use of @selector(dealloc) for unbelievably stupid reasons
+		static SEL deallocSel;
+		if (!deallocSel) deallocSel = sel_getUid("dealloc");
+#else
+		SEL deallocSel = @selector(dealloc);
+#endif
+		Method dealloc = class_getInstanceMethod(newCls, deallocSel);
+		IMP deallocImp = method_getImplementation(dealloc);
+		id deallocHandler = ^(__unsafe_unretained id self){
+			deallocImp(self, deallocSel);
+			_instance_hook_destroy(hook);
+			hook->obj = nil;
+		};
+		_class_hookMethod(newCls, dealloc, imp_implementationWithBlock(deallocHandler));
+		
+		object_setClass(obj, newCls);
+		_push_hook(hook);
+	}
 	
-	Method dealloc = class_getInstanceMethod(newCls, @selector(dealloc));
-	IMP deallocImp = method_getImplementation(dealloc);
-	id deallocHandler = ^(id self){
-		deallocImp(self, @selector(dealloc));
-		_instance_hook_destroy(hook);
-		hook->obj = nil;
-	};
-	_class_hookMethod(newCls, dealloc, imp_implementationWithBlock(deallocHandler));
-	
-	object_setClass(obj, newCls);
-	_push_hook(hook);
 	OSSpinLockUnlock(&lock);
-	return YES;
-	
-failure:
-	OSSpinLockUnlock(&lock);
-	return NO;
+	return success;
 }
 
 instance_hook_t instance_hook_create(id self, SEL cmd, id block)
