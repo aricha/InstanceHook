@@ -35,7 +35,7 @@ struct _instance_hook_s {
 static inline char *_instance_hook_copy_description(instance_hook_t hook)
 {
 	const char *methodName = sel_getName(hook->cmd);
-	size_t pointerSize = (sizeof(uintptr_t) * 2) + 2; // add 2 for 0x
+	size_t pointerSize = (sizeof(uintptr_t) * 2) + 3; // add 2 for 0x, 1 for null terminator
 	const char *formatString = "<instance_hook %p> (object: %p, method: %s, valid: %d)";
 	char *description = malloc(strlen(formatString) + 2*pointerSize + 1 + strlen(methodName));
 	sprintf(description, formatString, hook, hook->obj, methodName, hook->validHook);
