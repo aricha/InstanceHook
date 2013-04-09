@@ -24,13 +24,15 @@ From within a method hook, the original implementation can be looked up and call
 There is also a convenience method `instance_hook_perform_block`, which hooks a method on an object for the duration of the block, and removes the hook afterwards. It can be used like so:
 
 	NSObject *obj = [[NSObject new] autorelease];
+	static instance_hook_token_t token;
 	id hookBlock = ^NSString *(id self) {
-		return @" Hello world!";
-	};
-	instance_hook_t_block hook;
+		instance_hook_t hook = instance_hook_get_hook(&token, hookBlock);
+		NSString *origDescription = instance_hook_get_orig(hook)(self, @selector(description));
+		return [@"Hello world! Object: " stringByAppendingString:origDescription];
+	};	
 	instance_hook_perform_block(obj, @selector(description), hookBlock, ^{
-		NSString *helloWorld = [obj description]; // returns @"Hello World"
-	}, &hook);
+		NSString *helloWorld = [obj description]; // "Hello world" is prepended to the description
+	}, &token);
 	// the hook has now been removed
 
 There are a few caveats to watch out for when using InstanceHook:
