@@ -20,6 +20,12 @@
 	#define IHExtern extern
 #endif
 
+#ifdef IHUseARC
+	#define IHBridgeCast(type, obj) ((__bridge type)obj)
+#else
+	#define IHBridgeCast(type, obj) ((type)obj)
+#endif
+
 typedef struct _instance_hook_s *instance_hook_t;
 #define instance_hook_t_block __block instance_hook_t
 
@@ -42,4 +48,7 @@ IHExtern instance_hook_t instance_hook_retain(instance_hook_t hook);
 IHExtern void instance_hook_release(instance_hook_t hook);
 IHExtern BOOL instance_hook_is_valid(instance_hook_t hook);
 
-IHExtern void instance_hook_perform_block(id self, SEL cmd, id blockHook, void (^block)(), instance_hook_t *hook);
+typedef char instance_hook_token_t;
+IHExtern instance_hook_t instance_hook_get_hook(instance_hook_token_t *token, id self);
+
+IHExtern void instance_hook_perform_block(id self, SEL cmd, id blockHook, void (^block)(), instance_hook_token_t *token);

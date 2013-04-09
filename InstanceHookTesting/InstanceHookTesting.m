@@ -24,6 +24,14 @@
 	return @"Hello";
 }
 
+- (void)dealloc
+{
+	NSLog(@"deallocating!");
+#ifndef IHUseARC
+	[super dealloc];
+#endif
+}
+
 @end
 
 @implementation InstanceHookTesting
@@ -70,6 +78,17 @@
 	STAssertFalse(instance_hook_is_valid(otherHook), @"");
 	STAssertEqualObjects([t testMethod2], @"Hello", @"");
 	instance_hook_release(otherHook);
+	
+	static instance_hook_token_t token;
+	instance_hook_perform_block(t, @selector(testMethod2), ^(id self){
+		instance_hook_t blockHook = instance_hook_get_hook(&token, self);
+		IHIMP origImpl = instance_hook_get_orig(blockHook);
+		NSString *orig = IHBridgeCast(id, origImpl(self, @selector(testMethod2)));
+		return [orig stringByAppendingString:@" in a block!"];
+	}, ^{
+		STAssertEqualObjects([t testMethod2], @"Hello in a block!", @"");
+	}, &token);
+	STAssertEqualObjects([t testMethod2], @"Hello", @"");
 	
 #ifndef IHUseARC
 	[t release];

@@ -10,13 +10,8 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <libkern/OSAtomic.h>
 
+#define IHCacheCast(obj) IHBridgeCast(const void *, obj)
 #define log_err(fmt...) printf("instance_hook error: " fmt)
-
-#ifdef IHUseARC
-	#define IHBridgeCast(obj) ((__bridge const void *)obj)
-#else
-	#define IHBridgeCast(obj) ((const void *)obj)
-#endif
 
 static OSSpinLock lock;
 static CFMutableDictionaryRef DynamicSubclassesByObject;
@@ -45,10 +40,10 @@ static inline char *_instance_hook_copy_description(instance_hook_t hook)
 // caller should have acquired lock before calling
 static inline void _push_hook(instance_hook_t hook)
 {
-	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, IHBridgeCast(hook->obj));
+	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, IHCacheCast(hook->obj));
 	if (!hooksByMethod) {
 		hooksByMethod = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, NULL);
-		CFDictionarySetValue(InstanceHooksByObject, IHBridgeCast(hook->obj), hooksByMethod);
+		CFDictionarySetValue(InstanceHooksByObject, IHCacheCast(hook->obj), hooksByMethod);
 	}
 	instance_hook_t nextHook = (instance_hook_t)CFDictionaryGetValue(hooksByMethod, hook->cmd);
 	if (nextHook) hook->nextHook = nextHook;
@@ -62,8 +57,8 @@ static void _instance_hook_destroy(instance_hook_t hook)
 	OSSpinLockLock(&lock);
 	
 	hook->validHook = 0;
-	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, IHBridgeCast(hook->obj));
-	Class cls = CFDictionaryGetValue(DynamicSubclassesByObject, IHBridgeCast(hook->obj));
+	CFMutableDictionaryRef hooksByMethod = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByObject, IHCacheCast(hook->obj));
+	Class cls = CFDictionaryGetValue(DynamicSubclassesByObject, IHCacheCast(hook->obj));
 	instance_hook_t topHook = NULL;
 	if ((topHook = (instance_hook_t)CFDictionaryGetValue(hooksByMethod, hook->cmd))) {
 		if (topHook != hook) {
@@ -92,7 +87,7 @@ static void _instance_hook_destroy(instance_hook_t hook)
 	}
 	
 	if (hooksByMethod && !CFDictionaryGetCount(hooksByMethod)) {
-		CFDictionaryRemoveValue(DynamicSubclassesByObject, IHBridgeCast(hook->obj));
+		CFDictionaryRemoveValue(DynamicSubclassesByObject, IHCacheCast(hook->obj));
 		object_setClass(hook->obj, class_getSuperclass(cls));
 		objc_disposeClassPair(cls);
 	}
@@ -160,7 +155,7 @@ static BOOL _hook_instance(instance_hook_t hook) // where the magic happens
 	
 	Class newCls = Nil;
 	BOOL success = YES;
-	if (!(newCls = CFDictionaryGetValue(DynamicSubclassesByObject, IHBridgeCast(obj)))) {
+	if (!(newCls = CFDictionaryGetValue(DynamicSubclassesByObject, IHCacheCast(obj)))) {
 		const char *clsName = class_getName(cls);
 		
 		// convert address into string
@@ -187,7 +182,7 @@ static BOOL _hook_instance(instance_hook_t hook) // where the magic happens
 			
 			if (success) {
 				objc_registerClassPair(newCls);
-				CFDictionarySetValue(DynamicSubclassesByObject, IHBridgeCast(obj), IHBridgeCast(newCls));
+				CFDictionarySetValue(DynamicSubclassesByObject, IHCacheCast(obj), IHCacheCast(newCls));
 				
 				Method classMethod = class_getInstanceMethod(newCls, @selector(class));
 				id hookedClass = ^Class(__unsafe_unretained id self){
@@ -210,11 +205,11 @@ static BOOL _hook_instance(instance_hook_t hook) // where the magic happens
 		SEL deallocSel = @selector(dealloc);
 #endif
 		Method dealloc = class_getInstanceMethod(newCls, deallocSel);
-		IMP deallocImp = method_getImplementation(dealloc);
+		IHIMP deallocImp = (IHIMP)method_getImplementation(dealloc);
 		id deallocHandler = ^(__unsafe_unretained id self){
-			deallocImp(self, deallocSel);
 			_instance_hook_destroy(hook);
 			hook->obj = nil;
+			if (deallocImp) deallocImp(self, deallocSel);
 		};
 		_class_hookMethod(newCls, dealloc, imp_implementationWithBlock(deallocHandler));
 		
@@ -248,12 +243,41 @@ instance_hook_t instance_hook_create_f(id self, SEL cmd, IMP imp)
 	return hook;
 }
 
-void instance_hook_perform_block(id self, SEL cmd, id blockHook, void (^block)(), instance_hook_t *hook)
+static CFMutableDictionaryRef InstanceHooksByToken;
+instance_hook_t instance_hook_get_hook(instance_hook_token_t *token, __unsafe_unretained id self)
+{
+	if (!InstanceHooksByToken || !token) return NULL;
+	CFMutableDictionaryRef objectsForToken = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByToken, token);
+	if (!objectsForToken) return NULL;
+	return (instance_hook_t)CFDictionaryGetValue(objectsForToken, IHCacheCast(self));
+}
+
+void instance_hook_perform_block(id self, SEL cmd, id blockHook, void (^block)(), instance_hook_token_t *token)
 {
 	if (!blockHook || !block) return;
 	
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		InstanceHooksByToken = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, NULL);
+	});
+	
 	instance_hook_t h = instance_hook_create(self, cmd, blockHook);
-	if (hook) *hook = h;
+	CFMutableDictionaryRef objectsForToken;
+	if (h) {
+		objectsForToken = (CFMutableDictionaryRef)CFDictionaryGetValue(InstanceHooksByToken, token);
+		if (!objectsForToken) {
+			objectsForToken = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, NULL, NULL);
+			CFDictionarySetValue(InstanceHooksByToken, token, objectsForToken);
+		}
+		if (CFDictionaryContainsKey(objectsForToken, IHCacheCast(self)))
+			log_err("token %p already has an associated hook for object %p!\n", token, self);
+		CFDictionarySetValue(objectsForToken, IHCacheCast(self), h);
+	}
 	block();
-	instance_hook_remove(h);
+	if (h) {
+		instance_hook_remove(h);
+		CFDictionaryRemoveValue(objectsForToken, IHCacheCast(self));
+		if (!CFDictionaryGetCount(objectsForToken))
+			CFDictionaryRemoveValue(InstanceHooksByToken, token);
+	}
 }
