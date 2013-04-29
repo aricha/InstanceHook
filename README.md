@@ -36,7 +36,7 @@ There is also a convenience method `instance_hook_perform_block`, which hooks a 
 	}, &token);
 	// the hook has now been removed
 
-## instance_hook_get_orig and return types:
+#### instance_hook_get_orig and return types:
 
 instance_hook_get_orig will return an id object (or void * with ARC) which can be normally casted to any objc pointer
 When a cast to a non objc type (like primitive C-Types) is required (see all 3 test hooks above) you need to use IHIMPCast:
@@ -45,10 +45,10 @@ When a cast to a non objc type (like primitive C-Types) is required (see all 3 t
 	<returntype> value = IHIMPCast(instance_hook_get_orig(hook), <returntype>) (self, <selector>);
 
 
-## There are a few caveats to watch out for when using InstanceHook:
+#### There are a few caveats to watch out for when using InstanceHook:
 
-• It is **not** compatible with Key-Value Observing (KVO), nor does it account for any method hooks that occur after using `instance_hook_create` if they are not also done using InstanceHook.
-• It is not entirely thread-safe - do not share `instance_hook_t` objects across multiple threads.
+• It is **not** compatible with Key-Value Observing (KVO), nor does it account for any method hooks that occur after using `instance_hook_create` if they are not also done using InstanceHook.<p>
+• It is not entirely thread-safe - do not share `instance_hook_t` objects across multiple threads.<p>
 • When using `instance_hook_create`, if you choose to use a block hook and want to call the original method, you **must** declare the returned `instance_hook_t` object as either being `static` or being of type `instance_hook_t_block`. The latter adds the `__block` qualifier that is necessary to be able to reference the correct value of the `instance_hook_t` object from within the block (when the object is created on the stack).
 
 • InstanceHook is completely compatible with ARC and MRC
