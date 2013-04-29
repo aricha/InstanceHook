@@ -39,7 +39,7 @@ There is also a convenience method `instance_hook_perform_block`, which hooks a 
 #### instance_hook_get_orig and return types:
 
 instance_hook_get_orig will return an id object (or void * with ARC) which can be normally casted to any objc pointer
-When a cast to a non objc type (like primitive C-Types) is required (see all 3 test hooks above) you need to use IHIMPCast:
+When a cast to a non objc type (like primitive C-Types) is required (see InstanceHookTesting Xcode project) you need to use IHIMPCast:
 
 	<returntype> value = IHIMPCast(instance_hook_get_orig(hook), <returntype>, <arg1type>, <arg2type>, ..., <argNtype>) (self, <selector>, <arg1>, <arg2>, ..., <argN>);
 
