@@ -41,11 +41,11 @@ There is also a convenience method `instance_hook_perform_block`, which hooks a 
 instance_hook_get_orig will return an id object (or void * with ARC) which can be normally casted to any objc pointer
 When a cast to a non objc type (like primitive C-Types) is required (see all 3 test hooks above) you need to use IHIMPCast:
 
-	<returntype> value = IHIMPCast(instance_hook_get_orig(hook), *returntype*, *arg1type*, *arg2type*, ..., *argNtype*) (self, *selector*, *arg1*, *arg2*, ..., *argN*);
+	<returntype> value = IHIMPCast(instance_hook_get_orig(hook), <returntype>, <arg1type>, <arg2type>, ..., <argNtype>) (self, <selector>, <arg1>, <arg2>, ..., <argN>);
 
-*argNtype* and *argN* stands for the number of args in the method, if there are 0 args then it would simply look like this:
+<<argNtype>> and <<argN>> stands for the number of args in the method, if there are 0 args then it would simply look like this:
 
-	*returntype* value = IHIMPCast(instance_hook_get_orig(hook), *returntype*) (self, *selector*);
+	<returntype> value = IHIMPCast(instance_hook_get_orig(hook), <returntype>) (self, <selector>);
 
 
 
