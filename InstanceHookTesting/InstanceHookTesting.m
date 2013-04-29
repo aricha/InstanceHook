@@ -19,6 +19,10 @@
 	return 50;
 }
 
+- (float)testMethod1:(NSUInteger)arg {
+    return (float)arg/2.0f;
+}
+
 - (NSString *)testMethod2
 {
 	return @"Hello";
@@ -53,22 +57,38 @@
 - (void)testBasicFunctionality
 {
 	TestClass *t = [TestClass new];
-	instance_hook_t_block hook = instance_hook_create(t, @selector(testMethod), ^NSUInteger(id self) {
-		NSUInteger orig = (NSUInteger)instance_hook_get_orig(hook)(self, @selector(testMethod));
+	instance_hook_t_block hook = instance_hook_create(t, @selector(testMethod), ^NSUInteger(__typeof(t) self) {
+        //proper casting using IHIMPCast
+		NSUInteger orig = IHIMPCast(instance_hook_get_orig(hook), NSUInteger)(self, @selector(testMethod));
 		return 100 + orig;
 	});
-	instance_hook_t_block innerHook = instance_hook_create(t, @selector(testMethod), ^NSUInteger(id self) {
-		NSUInteger innerOrig = (NSUInteger)instance_hook_get_orig(innerHook)(self, @selector(testMethod));
+    
+    instance_hook_t_block floatHook = instance_hook_create(t, @selector(testMethod1:), ^NSUInteger(__typeof(t) self, NSUInteger arg1) {
+        //proper casting using IHIMPCast
+		float orig = IHIMPCast(instance_hook_get_orig(floatHook), float, NSUInteger)(self, @selector(testMethod), arg1);
+		return orig/2.0f;
+	});
+    
+	instance_hook_t_block innerHook = instance_hook_create(t, @selector(testMethod), ^NSUInteger(__typeof(t) self) {
+        //proper casting using IHIMPCast
+		NSUInteger innerOrig = IHIMPCast(instance_hook_get_orig(innerHook), NSUInteger)(self, @selector(testMethod));
 		return 1 + innerOrig;
 	});
+    
 	STAssertEquals([t class], [TestClass class], @"");
+    
 	STAssertEquals([t testMethod], (NSUInteger)151, @"");
 	instance_hook_remove(hook);
-	STAssertEquals([t testMethod], (NSUInteger)51, @"");
+    STAssertEquals([t testMethod], (NSUInteger)51, @"");
+    
+    STAssertEquals([t testMethod1:20], 5.0f, @"");
+	instance_hook_remove(floatHook);
+    STAssertEquals([t testMethod1:20], 10.0f, @"");
+    
 	instance_hook_remove(innerHook);
 	STAssertEquals([t testMethod], (NSUInteger)50, @"");
 	
-	instance_hook_t_block otherHook = instance_hook_create(t, @selector(testMethod2), ^NSString*(id self){
+	instance_hook_t_block otherHook = instance_hook_create(t, @selector(testMethod2), ^NSString*(__typeof(t) self){
 		return @"Goodbye";
 	});
 	instance_hook_retain(otherHook);
@@ -80,7 +100,7 @@
 	instance_hook_release(otherHook);
 	
 	static instance_hook_token_t token;
-	instance_hook_perform_block(t, @selector(testMethod2), ^(id self){
+	instance_hook_perform_block(t, @selector(testMethod2), ^(__typeof(t) self){
 		instance_hook_t blockHook = instance_hook_get_hook(&token, self);
 		IHIMP origImpl = instance_hook_get_orig(blockHook);
 		NSString *orig = IHBridgeCast(id, origImpl(self, @selector(testMethod2)));

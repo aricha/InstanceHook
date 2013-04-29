@@ -10,7 +10,7 @@
 		0D88FD63170BF528005D3291 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D88FD62170BF527005D3291 /* SenTestingKit.framework */; };
 		0D88FD65170BF528005D3291 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D88FD64170BF528005D3291 /* Cocoa.framework */; };
 		0D88FD6F170BF528005D3291 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0D88FD6D170BF528005D3291 /* InfoPlist.strings */; };
-		0D88FD72170BF528005D3291 /* InstanceHookTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D88FD71170BF528005D3291 /* InstanceHookTesting.m */; };
+		0D88FD72170BF528005D3291 /* InstanceHookTesting.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D88FD71170BF528005D3291 /* InstanceHookTesting.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		0D88FD77170BF579005D3291 /* InstanceHook.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D88FD5A170BF488005D3291 /* InstanceHook.m */; };
 /* End PBXBuildFile section */
 
