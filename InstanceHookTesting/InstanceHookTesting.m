@@ -63,10 +63,11 @@
 		return 100 + orig;
 	});
     
-    instance_hook_t_block floatHook = instance_hook_create(t, @selector(testMethod1:), ^NSUInteger(__typeof(t) self, NSUInteger arg1) {
+    instance_hook_t_block floatHook = instance_hook_create(t, @selector(testMethod1:), ^float(__typeof(t) self, NSUInteger arg1) {
         //proper casting using IHIMPCast
 		float orig = IHIMPCast(instance_hook_get_orig(floatHook), float, NSUInteger)(self, @selector(testMethod), arg1);
-		return orig/2.0f;
+        float result = orig/2.0;
+		return result;
 	});
     
 	instance_hook_t_block innerHook = instance_hook_create(t, @selector(testMethod), ^NSUInteger(__typeof(t) self) {

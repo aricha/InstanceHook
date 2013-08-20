@@ -14,16 +14,16 @@
 	#endif
 #endif
 
-#ifdef __cplusplus
-	#define IHExtern extern "C"
-#else
-	#define IHExtern extern
-#endif
-
 #ifdef IHUseARC
 	#define IHBridgeCast(type, obj) ((__bridge type)obj)
 #else
 	#define IHBridgeCast(type, obj) ((type)obj)
+#endif
+
+#ifdef __cplusplus
+#define IHExtern extern "C"
+#else
+#define IHExtern extern
 #endif
 
 typedef struct _instance_hook_s *instance_hook_t;
