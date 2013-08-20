@@ -20,6 +20,12 @@
 	#define IHBridgeCast(type, obj) ((type)obj)
 #endif
 
+#ifdef __cplusplus
+#define IHExtern extern "C"
+#else
+#define IHExtern extern
+#endif
+
 typedef struct _instance_hook_s *instance_hook_t;
 #define instance_hook_t_block __block instance_hook_t
 
@@ -41,18 +47,18 @@ typedef id (*IHIMP)(id, SEL, ...);
  * <returntype> value = IHIMPCast(instance_hook_get_orig(hook), <returntype>) (self, <selector>);
  */
 
-FOUNDATION_EXTERN instance_hook_t instance_hook_create(id self, SEL cmd, id block);
-FOUNDATION_EXTERN instance_hook_t instance_hook_create_f(id self, SEL cmd, IMP imp);
+IHExtern instance_hook_t instance_hook_create(id self, SEL cmd, id block);
+IHExtern instance_hook_t instance_hook_create_f(id self, SEL cmd, IMP imp);
 
-FOUNDATION_EXTERN IHIMP instance_hook_get_orig(instance_hook_t hook);
+IHExtern IHIMP instance_hook_get_orig(instance_hook_t hook);
 
-FOUNDATION_EXTERN void instance_hook_remove(instance_hook_t hook);
+IHExtern void instance_hook_remove(instance_hook_t hook);
 
-FOUNDATION_EXTERN instance_hook_t instance_hook_retain(instance_hook_t hook);
-FOUNDATION_EXTERN void instance_hook_release(instance_hook_t hook);
-FOUNDATION_EXTERN BOOL instance_hook_is_valid(instance_hook_t hook);
+IHExtern instance_hook_t instance_hook_retain(instance_hook_t hook);
+IHExtern void instance_hook_release(instance_hook_t hook);
+IHExtern BOOL instance_hook_is_valid(instance_hook_t hook);
 
 typedef char instance_hook_token_t;
-FOUNDATION_EXTERN instance_hook_t instance_hook_get_hook(instance_hook_token_t *token, id self);
+IHExtern instance_hook_t instance_hook_get_hook(instance_hook_token_t *token, id self);
 
-FOUNDATION_EXTERN void instance_hook_perform_block(id self, SEL cmd, id blockHook, void (^block)(), instance_hook_token_t *token);
+IHExtern void instance_hook_perform_block(id self, SEL cmd, id blockHook, void (^block)(), instance_hook_token_t *token);
